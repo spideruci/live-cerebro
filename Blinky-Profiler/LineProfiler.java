@@ -69,7 +69,7 @@ public class LineProfiler extends EmptyProfiler implements IProfiler {
 		}
 
 		String sourceLineInsnId = e.getExecInsnEventId();
-		REAL_OUT.println(lineMap.get(sourceLineInsnId).lineNumber);
+		REAL_OUT.println("Line:" + lineMap.get(sourceLineInsnId).lineNumber);
 		if (lineProfileCounts.containsKey(sourceLineInsnId)) {
 			int count = lineProfileCounts.get(sourceLineInsnId);
 			lineProfileCounts.put(sourceLineInsnId, count + 1);
