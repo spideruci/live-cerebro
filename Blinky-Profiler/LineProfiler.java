@@ -5,34 +5,6 @@ import org.spideruci.analysis.trace.EventType;
 import org.spideruci.analysis.trace.TraceEvent;
 import java.util.*; 
 
-class ClassAndMethod {
-	String className;
-	String methodName;
-  
-	public ClassAndMethod(String className, String methodName) {
-	  this.className = className;
-	  this.methodName = methodName;
-	}
-  
-	@Override
-	public String toString() {
-	  return className + "." + methodName;
-	}x
-  }
-  
-class Line {
-	String className;
-	String methodName;
-	int lineNumber;
-
-	public Line(ClassAndMethod classAndMethod, int lineNumber) {
-		this.className = classAndMethod.className;
-		this.methodName = classAndMethod.methodName;
-		this.lineNumber = lineNumber;
-	}
-}
-
-
 public class LineProfiler extends EmptyProfiler implements IProfiler {
 	LinkedHashMap<String, Integer> lineProfileCounts = new LinkedHashMap<>();;
 	HashMap<Long, ClassAndMethod> parentMap = new HashMap<>();
@@ -97,7 +69,7 @@ public class LineProfiler extends EmptyProfiler implements IProfiler {
 		}
 
 		String sourceLineInsnId = e.getExecInsnEventId();
-		REAL_OUT.println("Line:" + lineMap.get(sourceLineInsnId).lineNumber);
+		REAL_OUT.println("Line:" + lineMap.get(sourceLineInsnId).lineNumber + "  Class: " + lineMap.get(sourceLineInsnId).className);
 		if (lineProfileCounts.containsKey(sourceLineInsnId)) {
 			int count = lineProfileCounts.get(sourceLineInsnId);
 			lineProfileCounts.put(sourceLineInsnId, count + 1);
@@ -150,3 +122,29 @@ public class LineProfiler extends EmptyProfiler implements IProfiler {
   
 }
 
+class ClassAndMethod {
+	String className;
+	String methodName;
+  
+	public ClassAndMethod(String className, String methodName) {
+	  this.className = className;
+	  this.methodName = methodName;
+	}
+  
+	@Override
+	public String toString() {
+	  return className + "." + methodName;
+	}
+  }
+  
+  class Line {
+	String className;
+	String methodName;
+	int lineNumber;
+  
+	public Line(ClassAndMethod classAndMethod, int lineNumber) {
+	  this.className = classAndMethod.className;
+	  this.methodName = classAndMethod.methodName;
+	  this.lineNumber = lineNumber;
+	}
+  }
