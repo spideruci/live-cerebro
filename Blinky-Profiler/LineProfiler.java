@@ -11,6 +11,7 @@ public class LineProfiler extends EmptyProfiler implements IProfiler {
 	HashMap<String, Line> lineMap = new HashMap<>();
 	ArrayList<String> instrumentedClasses = new ArrayList<>();
 	ArrayList<String> instrumentedMethods = new ArrayList<>();
+	public Queue<Line> queue = new LinkedList<>();
 
 	@Override
 	public String description() {
@@ -69,6 +70,7 @@ public class LineProfiler extends EmptyProfiler implements IProfiler {
 		}
 
 		String sourceLineInsnId = e.getExecInsnEventId();
+		queue.add(lineMap.get(sourceLineInsnId));
 		REAL_OUT.println("Line:" + lineMap.get(sourceLineInsnId).lineNumber + "  Class: " + lineMap.get(sourceLineInsnId).className);
 		if (lineProfileCounts.containsKey(sourceLineInsnId)) {
 			int count = lineProfileCounts.get(sourceLineInsnId);
