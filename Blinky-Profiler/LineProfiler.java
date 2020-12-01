@@ -1,9 +1,12 @@
 package org.spideruci.analysis.dynamic.api;
 
 import static org.spideruci.analysis.dynamic.Profiler.REAL_OUT;
+import static org.spideruci.analysis.dynamic.Profiler.REAL_ERR;
 import org.spideruci.analysis.trace.EventType;
 import org.spideruci.analysis.trace.TraceEvent;
 import java.util.*; 
+import java.io.FileWriter;   
+import java.io.IOException;
 
 public class LineProfiler extends EmptyProfiler implements IProfiler {
 	LinkedHashMap<String, Integer> lineProfileCounts = new LinkedHashMap<>();;
@@ -12,6 +15,10 @@ public class LineProfiler extends EmptyProfiler implements IProfiler {
 	ArrayList<String> instrumentedClasses = new ArrayList<>();
 	ArrayList<String> instrumentedMethods = new ArrayList<>();
 	public Queue<Line> queue = new LinkedList<>();
+	FileWriter myWriter;
+	
+	
+	
 
 	@Override
 	public String description() {
@@ -20,6 +27,13 @@ public class LineProfiler extends EmptyProfiler implements IProfiler {
 
 	@Override
 	public void startProfiling() {
+		try{
+			myWriter = new FileWriter("output.txt");
+		}
+		catch (IOException err) {
+			System.out.println("An error occurred.");
+			err.printStackTrace();
+		}
 		REAL_OUT.println("Starting traceing");
 	}
 
@@ -71,7 +85,17 @@ public class LineProfiler extends EmptyProfiler implements IProfiler {
 
 		String sourceLineInsnId = e.getExecInsnEventId();
 		queue.add(lineMap.get(sourceLineInsnId));
-		REAL_OUT.println("Line:" + lineMap.get(sourceLineInsnId).lineNumber + "  Class: " + lineMap.get(sourceLineInsnId).className);
+		try{
+			
+			myWriter.write("Thread: " + Thread.currentThread().getId() +" Line:" + lineMap.get(sourceLineInsnId).lineNumber + "  Class: " + lineMap.get(sourceLineInsnId).className);
+			myWriter.write(System.getProperty( "line.separator" ));
+		}
+		catch (IOException err) {
+			System.out.println("An error occurred.");
+			err.printStackTrace();
+		}
+		REAL_OUT.println("Thread: " + Thread.currentThread().getId() +" Line:" + lineMap.get(sourceLineInsnId).lineNumber + "  Class: " + lineMap.get(sourceLineInsnId).className);
+		//System.out.println("Line:" + lineMap.get(sourceLineInsnId).lineNumber + "  Class: " + lineMap.get(sourceLineInsnId).className);
 		if (lineProfileCounts.containsKey(sourceLineInsnId)) {
 			int count = lineProfileCounts.get(sourceLineInsnId);
 			lineProfileCounts.put(sourceLineInsnId, count + 1);
@@ -82,6 +106,13 @@ public class LineProfiler extends EmptyProfiler implements IProfiler {
 
 	@Override
 	public void endProfiling() {
+		try{
+			myWriter.close();
+		}
+		catch (IOException err) {
+			System.out.println("An error occurred.");
+			err.printStackTrace();
+		}
 		REAL_OUT.println("ending Line Profiler");
 
 		// REAL_OUT.printf("Classes instrumented: %s\n", this.instrumentedClasses.size());
