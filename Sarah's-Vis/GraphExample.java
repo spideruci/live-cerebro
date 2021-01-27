@@ -28,7 +28,8 @@ public class GraphExample implements MouseListener{
 		HashMap<String, Integer> edgeCountMap = new HashMap<>();
 		System.setProperty("org.graphstream.ui", "swing");
 
-		String prevNode = "";
+		String prevNode1 = "";
+		String prevNode2 = "";
 		try{
 			Scanner in = new Scanner(lines);
 			Viewer viewer = graph.display();
@@ -36,24 +37,51 @@ public class GraphExample implements MouseListener{
 			view.enableMouseOptions();
 			view.addListener("Mouse", (MouseListener)this);
 			graph.setAttribute("stylesheet", "graph { fill-color: black; }" +
-					"node { fill-mode: gradient-radial; fill-color: rgba(204,255,255,228), rgba(204,255,255,8); }");
-			// figure out how to fade the colors from darker to lighter red
+						//	"node { fill-mode: dyn-plain; fill-color: red, blue; }");
 
+					"node { fill-mode: gradient-radial; fill-color: rgba(200,255,255,228), rgba(200,255,255,8); }");
+			// figure out how to fade the colors from darker to lighter red
+			//					"node { text-color: white;" +"fill-mode: gradient-radial; fill-color: rgba(170,255,255,228), rgba(170,255,255,8); }");
+			boolean first = false;
 			while(in.hasNextLine()) {
 				String line = in.nextLine();
 				String[] lineArgs = line.split(" ");
 				String node1 = lineArgs[1];
 				String node2 = lineArgs[3];
-				Thread.sleep(200);
-				if (graph.getNode(node1) == null) {
+				Thread.sleep(300);
+				if(prevNode1.length() == 0){
 					graph.addNode(node1);
 					Node n = graph.getNode(node1);
-					n.setAttribute("ui.label", "    " + n.getId());
-				}
-				if (graph.getNode(node2) == null) {
+					n.setAttribute("ui.style",  "fill-mode: gradient-radial; fill-color: rgba(150,255,255,228), rgba(200,255,255,8); ");
 					graph.addNode(node2);
-					Node n = graph.getNode(node2);
-					n.setAttribute("ui.label", "    " + n.getId());
+					Node n2 = graph.getNode(node2);
+					n2.setAttribute("ui.style",  "fill-mode: gradient-radial; fill-color: rgba(150,255,255,228), rgba(200,255,255,8); ");
+					prevNode1 = node1;
+					prevNode2 = node2;
+				} else{
+					if (graph.getNode(node1) == null) {
+						graph.addNode(node1);
+						Node n = graph.getNode(node1);
+						n.setAttribute("ui.style",  "fill-mode: gradient-radial; fill-color: rgba(150,255,255,228), rgba(200,255,255,8); ");
+					} else if (graph.getNode(node1) != null){
+						Node n1 = graph.getNode(node1);
+						n1.setAttribute("ui.style",  "fill-mode: gradient-radial; fill-color: rgba(150,255,255,228), rgba(200,255,255,8); ");
+					}
+					if (graph.getNode(node2) == null) {
+						graph.addNode(node2);
+						Node n = graph.getNode(node2);
+						n.setAttribute("ui.style",  "fill-mode: gradient-radial; fill-color: rgba(150,255,255,228), rgba(200,255,255,8); ");
+					} else if (graph.getNode(node2) != null){
+						Node n2 = graph.getNode(node2);
+						n2.setAttribute("ui.style",  "fill-mode: gradient-radial; fill-color: rgba(150,255,255,228), rgba(200,255,255,8); ");
+					}
+					Node prevn1 = graph.getNode(prevNode1);
+					prevn1.setAttribute("ui.style",  "fill-mode: gradient-radial; fill-color: rgba(255,0,0,228), rgba(255,0,0,8); ");
+					Node prevn2 = graph.getNode(prevNode2);
+					prevn2.setAttribute("ui.style",  "fill-mode: gradient-radial; fill-color: rgba(255,0,0,228), rgba(255,0,0,8); ");
+
+					prevNode1 = node1;
+					prevNode2 = node2;
 				}
 
 				if (graph.getEdge(node1 + " " + node2) == null) {
@@ -62,8 +90,8 @@ public class GraphExample implements MouseListener{
 					Edge edge = graph.getEdge(node1 + " " + node2);
 					double weight = (3.3 - edgeCountMap.get(node1 + " " + node2));
 					edge.setAttribute("layout.weight", weight);
-					edge.setAttribute("ui.style", "size: 1px; fill-color: rgba(255,255,255,68);");
-				} else {
+					edge.setAttribute("ui.style", "size: 2px; fill-color: rgba(255,255,255,68);");}
+				 else {
 					// compare this to the max and if getting it + 1 is greater, then update max
 					edgeCountMap.put(node1 + " " + node2, edgeCountMap.get(node1 + " " + node2) + 1);
 					int count = edgeCountMap.get(node1 + " " + node2);
@@ -73,7 +101,9 @@ public class GraphExample implements MouseListener{
 					String size = String.valueOf(2 * count);
 					String str = "size: " + size + "px; fill-color: rgba(255,255,255,68);";
 					edge.setAttribute("ui.style", str);
+
 				}
+
 			}
 		}
 		catch(InterruptedException e){
@@ -84,7 +114,6 @@ public class GraphExample implements MouseListener{
 		}
 
 	}
-
 
 	// getX() and getY() functions return the
 	// x and y coordinates of the current
