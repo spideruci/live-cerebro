@@ -11,6 +11,8 @@ import java.util.*;
 import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
+import org.graphstream.ui.swing_viewer.DefaultView;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -22,12 +24,13 @@ import java.time.Instant;
 import java.time.Duration;
 
 public class LiveCerebro implements MouseListener {
-	private static final int[] FEEDING_TIMES = {0, 10, 30, 50, 100, 200, 300};
+	//TODO: call init in the button push. remove for loop of feeding times.
+	private static final int[] FEEDING_TIMES = {0, 10, 30, 50, 100, 200, 300, 500};
 
 	// Graph structure for manipulating the graph such as nodes and edges
 	private static Graph graph;
 	// Panel on a graphic graph
-	private static View view;
+	private static DefaultView view;
 	private static Viewer viewer;
 	// Layout to compute nodes' best possible positions
 	private static Layout layout;
@@ -39,6 +42,10 @@ public class LiveCerebro implements MouseListener {
 	// Objects for parsing JSON
 	private static Object jsonParser;
 	private static JSONObject jsonObject;
+	private Instant starts;
+	private Instant ends;
+	private JButton button;
+	private JFrame frame;
 
 	// Map for storing keys of class name & method name and values of colors
 	private HashMap<String, String> colors;
@@ -62,6 +69,8 @@ public class LiveCerebro implements MouseListener {
 			writer = new CSVWriter(outputfile);
 			jsonParser = new JSONParser().parse(new FileReader(inputJson));
 			jsonObject = (JSONObject) jsonParser;
+			frame = new JFrame();
+			frame.setPreferredSize(new Dimension(600,600));
 
 			// Generate color palette
 			generatePalette();
@@ -75,6 +84,7 @@ public class LiveCerebro implements MouseListener {
 				feed(FEEDING_TIMES[i]);
 			}
 			writer.close();
+
 		}
 		catch(Exception e) {
 			System.out.println(e);
@@ -85,18 +95,35 @@ public class LiveCerebro implements MouseListener {
 		Initializes the graph, view, and layout
 	 */
 	private void init(){
-		graph = new MultiGraph("Live Cerebro");
+		frame = new JFrame();
+		frame.setPreferredSize(new Dimension(800,700));
+		frame.setLayout(new FlowLayout());
+		graph = new DefaultGraph("Live Cerebro");
 		System.setProperty("org.graphstream.ui", "swing");
 		viewer = graph.display();
-		view = viewer.getDefaultView();
-		layout = new SpringBox(false);
-		graph.addSink(layout);
-		layout.addAttributeSink(graph);
-		layout.setStabilizationLimit(0.9);
+		view = (DefaultView) viewer.getDefaultView();
+		view.setPreferredSize(new Dimension(700,600));
+		frame.add(view);
+		button = new JButton("Timer");
+
+		frame.add(button);
+		view.openInAFrame(false);
+		frame.pack();
+
+		frame.setVisible(true);
+
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//
+//		layout = new SpringBox(false);
+//		graph.addSink(layout);
+//		layout.addAttributeSink(graph);
+//		layout.setStabilizationLimit(0.9);
+
 		view.enableMouseOptions();
 		viewer.enableAutoLayout(layout);
 		view.addListener("Mouse", (MouseListener) this);
-		graph.clear();
+
+		//graph.addAttribute("ui.quality");
 		graph.setAttribute("stylesheet", "graph { fill-color: black; }");
 	}
 
@@ -106,7 +133,6 @@ public class LiveCerebro implements MouseListener {
 	private void feed(int feedingTime) {
 		try {
 			init();
-
 			// Getting JSON array of nodes
 			JSONArray arr = (JSONArray) jsonObject.get("nodes");
 
@@ -136,7 +162,7 @@ public class LiveCerebro implements MouseListener {
 			// Getting JSON array of links
 			arr = (JSONArray) jsonObject.get("links");
 			// Start the timer
-			Instant starts = Instant.now();
+			starts = Instant.now();
 
 			for (int i = 0; i < arr.size(); i++) {
 				// Getting each link the array
@@ -170,19 +196,38 @@ public class LiveCerebro implements MouseListener {
 				}
 
 			}
-			// Compute layout while layout has not reached stabilization limit
-			while (layout.getStabilization() < .9) {
-				layout.compute();
-			}
+//			// Compute layout while layout has not reached stabilization limit
+//			while (layout.getStabilization() < 0.9) {
+//				layout.compute();
+//			}
 
 			// End the timer after graph has stabilized
-			Instant ends = Instant.now();
-			System.out.println("Seconds taken: " + Duration.between(starts, ends).getSeconds());
+//			Instant ends = Instant.now();
+//			System.out.println("Seconds taken: " + Duration.between(starts, ends).getSeconds());
+//
+//			// Add to the CSV output file
+//			String[] data1 = {String.valueOf(feedingTime), String.valueOf(Duration.between(starts, ends).getSeconds())};
+//			writer.writeNext(data1);
+//			writer.flush();
 
-			// Add to the CSV output file
-			String[] data1 = {String.valueOf(feedingTime), String.valueOf(Duration.between(starts, ends).getSeconds())};
-			writer.writeNext(data1);
-			writer.flush();
+				button.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						ends = Instant.now();
+						System.out.println("Seconds taken: " + Duration.between(starts, ends).getSeconds());
+
+						// Add to the CSV output file
+						String[] data1 = {String.valueOf(feedingTime), String.valueOf(Duration.between(starts, ends).getSeconds())};
+						writer.writeNext(data1);
+						try {
+							writer.flush();
+						} catch(Exception endTimer){
+							System.out.println("hi");
+						}
+					}
+				} );
+
+
+
 
 		}
 		catch(InterruptedException e){
