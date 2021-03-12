@@ -26,7 +26,7 @@ import java.time.Duration;
 public class LiveCerebro implements MouseListener {
 	//TODO: call init in the button push. remove for loop of feeding times.
 	private static final int[] FEEDING_TIMES = {0, 10, 30, 50, 100, 200, 300, 500};
-
+	private static int index = 0;
 	// Graph structure for manipulating the graph such as nodes and edges
 	private static Graph graph;
 	// Panel on a graphic graph
@@ -69,8 +69,6 @@ public class LiveCerebro implements MouseListener {
 			writer = new CSVWriter(outputfile);
 			jsonParser = new JSONParser().parse(new FileReader(inputJson));
 			jsonObject = (JSONObject) jsonParser;
-			frame = new JFrame();
-			frame.setPreferredSize(new Dimension(600,600));
 
 			// Generate color palette
 			generatePalette();
@@ -80,10 +78,10 @@ public class LiveCerebro implements MouseListener {
 			writer.writeNext(header);
 
 			// Feed in times
-			for(int i = 0; i < FEEDING_TIMES.length; i++){
-				feed(FEEDING_TIMES[i]);
-			}
-			writer.close();
+			//for(int i = 0; i < FEEDING_TIMES.length; i++){
+				feed(0);
+
+			//writer.close();
 
 		}
 		catch(Exception e) {
@@ -111,7 +109,6 @@ public class LiveCerebro implements MouseListener {
 		frame.pack();
 
 		frame.setVisible(true);
-
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //
 //		layout = new SpringBox(false);
@@ -133,6 +130,7 @@ public class LiveCerebro implements MouseListener {
 	private void feed(int feedingTime) {
 		try {
 			init();
+			System.out.println(feedingTime);
 			// Getting JSON array of nodes
 			JSONArray arr = (JSONArray) jsonObject.get("nodes");
 
@@ -220,14 +218,15 @@ public class LiveCerebro implements MouseListener {
 						writer.writeNext(data1);
 						try {
 							writer.flush();
+
+							writer.close();
+
 						} catch(Exception endTimer){
 							System.out.println("hi");
 						}
+
 					}
 				} );
-
-
-
 
 		}
 		catch(InterruptedException e){
